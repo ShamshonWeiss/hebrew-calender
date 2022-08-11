@@ -8,64 +8,49 @@ namespace MoladBasedCalender
 {
     internal class Day
     {
-        /* var protoYear = new Year(5785)
-         * protoYear.Leap 
-         * protoYear.RH[0]  dow of rosh hashana
-         * protoYear.nextRh[0] dow of next year rosh hashana
-         * protoYear.months arr of months
-         * protoYear["adar"] month obj of adar
-         * protoYear[2] month obj of 3rd month
-         * protoYear
-         * protoYear
-         * protoYear
-         * protoYear
-         * protoYear
-         * protoYear
-         * protoYear
-         * protoYear
-         * protoYear
-         * protoYear
-         * protoYear
-         * protoYear 
-         * 
-         */
         public Day(int date)
         {
             this.date = date;
         }
-        public Day(int day,string[] eventName):this(day)
+        /*
+         * to be added to code at a later time
+        public Day(int day, string[] eventName) : this(day)
         {
-            this.eventName=eventName;
+            this.eventName = eventName;
         }
+                string[] eventName;
+                */
         public int date;
-        string[] eventName;
     }
     internal class Month
     {
         public string name;
+        public bool leap;
         Day[] daysInMonth;
-        int[] molad;
-        public Month(string name,bool leap)
+        public int[] molad;
+        public Month(string name, bool leap)
         {
-            this.name=name;
+            this.name = name;
+            this.leap = leap;
             this.daysInMonth = leap ? new Day[30] : new Day[29];
             for (int i = 0; i < daysInMonth.Length; i++)
             {
-                this.daysInMonth[i] = new Day(i+1);
+                this.daysInMonth[i] = new Day(i + 1);
             }
         }
-        public Month(string name, bool leap,int[] molad): this(name,leap)
+        public Month(string name, bool leap, int[] molad) : this(name, leap)
         {
             this.molad = molad;
         }
         public void PrintMonth()
         {
+            Console.WriteLine("Chodesh: " + name);
             for (int i = 0; i < daysInMonth.Length; i++)
             {
-                Console.Write($"(M: {name} D:{this.daysInMonth[i].date}) "); ;
+                Console.Write($"[{this.daysInMonth[i].date}] "); ;
             }
         }
     }
-    
+
 }
 

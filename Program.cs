@@ -2,6 +2,20 @@
 
 namespace MoladBasedCalender
 {
+    /* var protoYear = new Year(5785)
+    * protoYear.Leap bool if leap
+    * protoYear.yearName chosor molei or shaliem
+    * protoYear.RH[0]  dow of rosh hashana
+    * protoYear.nextRh[0] dow of next year rosh hashana
+    * protoYear.months arr of months
+    * protoYear["adar"] month obj of adar
+    * protoYear[2] month obj of 3rd month
+    * 
+    * Year.PrintMoled(moled[]) Prints moled nicely
+    * protoYear[11].name gets name of month 
+    * protoYear[11].leap gets if month is leap
+    *  protoYear["adar"].PrintMonth() prints the month
+    */
     internal class Program
     {
         static void Main(string[] args)
@@ -14,6 +28,7 @@ namespace MoladBasedCalender
                 Console.WriteLine($"year name {thisYear.yearName}");
                 thisYear[2].PrintMonth();
                 thisYear["elul"].PrintMonth();
+                Year.PrintMoled(thisYear[2].molad);
             }
 
         }
@@ -26,15 +41,16 @@ namespace MoladBasedCalender
         public int[] RH { get { return rh; } }
         private int[] rh;
         public int[] nextRh;
-        int extraDays;
+        private int extraDays;
         private bool[] leapMonths;
+        private string[] monthNames;
         Month[] months;
         public Year(int year)
-        {   
-            int[] oldM = GetMoladOnYear(year);
+        {
+            int[] oldM = GetMoladRh(year);
             this.leap = GetLeap(year);
-            bool prevLeap = GetLeap(year-1);
-            bool nextLeap = GetLeap(year+1);
+            bool prevLeap = GetLeap(year - 1);
+            bool nextLeap = GetLeap(year + 1);
             int[] nextMoled = AddMoledYear(oldM, leap);
             this.rh = DaledDechios(oldM, leap, prevLeap);
             this.nextRh = DaledDechios(nextMoled, nextLeap, leap);
@@ -42,14 +58,16 @@ namespace MoladBasedCalender
             this.leapMonths = Chesiros(leap, extraDays);
 
             this.months = leap ? new Month[13] : new Month[12];
-            Console.WriteLine(months.Length);
+            int[] monthMolad = oldM;
             for (int i = 0; i < months.Length; i++)
             {
-                months[i] = new Month(monthNames[i], leapMonths[i]);
-                Console.WriteLine(months[i].name);
+                months[i] = new Month(monthNames[i], leapMonths[i], monthMolad);
+                monthMolad = AddMoled(monthMolad, 1);
             }
         }
-        public static int[] GetMoladOnYear(int year)
+        public Month this[int index] => months[index];
+        public Month this[string monthName] => GetMonth(monthName);
+        public static int[] GetMoladRh(int year)
         {
             year--;
             int[] moladToho = { 2, 5, 204 };
@@ -58,7 +76,7 @@ namespace MoladBasedCalender
             moladRh = AddMoled(moladRh, monthsIntoC[(year % 19)]);
             return moladRh;
         }
-        static bool GetLeap(int yearNum)
+        public static bool GetLeap(int yearNum)
         {
             int yearInSCycle = yearNum % 19;
             switch (yearInSCycle)
@@ -81,8 +99,6 @@ namespace MoladBasedCalender
             }
         }
 
-        //                          [tishrei,cheshvan,kisleiv,teivis,shvat,adar,nissan,iyar,sivan,tamuz,av,elul]
-        private string[] monthNames = { "tishrei", "cheshvan", "kisleiv", "teivis", "shvat", "adar", "nissan", "iyar", "sivan", "tamuz", "av", "elul" };
         public static int[] AddMoled(int[] previousM, int mLater) // takes a molad[] and an int and returns the molad int months later
         {
             //int[] monthLength = { 29, 12, 793 }; // dd hh chelakim(793/1080)
@@ -106,8 +122,6 @@ namespace MoladBasedCalender
             MoledFixer(ref newM);
             return newM;
         }
-        public Month this[int index] => months[index];
-        public Month this[string monthName] => GetMonth(monthName);
         public static int[] AddMoledYear(int[] roshHashana, bool leap) // takes a molad[] for Rosh Hashana and a bool if  leap year returns the molad next Rosh Hashana
         {
             int[] newM = !leap ? AddMoled(roshHashana, 12) : AddMoled(roshHashana, 13);
@@ -155,7 +169,10 @@ namespace MoladBasedCalender
         }
         public bool[] Chesiros(bool leap, int extraDays)
         {
-            bool[] leapMonths = { true, false, true, false, true, false, true, false, true, false, true, false };
+            bool[] leapMonths = leap ? new bool[] { true, false, true, false, true, true, false, true, false, true, false, true, false } :
+                new bool[] { true, false, true, false, true, false, true, false, true, false, true, false };
+            this.monthNames = leap ? new string[] { "tishrei", "cheshvan", "kisleiv", "teivis", "shvat", "adarI", "adarII", "nissan", "iyar", "sivan", "tamuz", "av", "elul" } :
+                new string[] { "tishrei", "cheshvan", "kisleiv", "teivis", "shvat", "adar", "nissan", "iyar", "sivan", "tamuz", "av", "elul" };
             if ((leap && extraDays == 5) || (!leap && extraDays == 3))//too litle days in year = make kisleiv not leap 
             {
                 leapMonths[2] = false;
